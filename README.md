@@ -25,9 +25,7 @@ The learnable weights of a Conv2d module follows the shape:
 
 $$
 \begin{equation} 
-
     (\texttt{out\_channels}, \frac{\texttt{in\_channels}}{\texttt{groups}},  \texttt{k\_rows}, \texttt{k\_cols})
-
 \end{equation}
 $$
 
@@ -35,12 +33,10 @@ where, by default, $\texttt{groups}=1$ [[1]]. And base on $(1)$ the total number
 
 $$
 \begin{equation} 
-
 \texttt{in\_channels} 
 \times \texttt{out\_channels} 
 \times \texttt{k\_rows} 
 \times \texttt{k\_cols}
-
 \end{equation}
 $$
 
@@ -57,13 +53,11 @@ The total learnable parameters for this convolution layer is (without bias):
 
 $$
 \begin{equation}
-
 \texttt{in\_channels} 
 \times \texttt{out\_channels} 
 + 
 \texttt{out\_channels} 
 \times K
-
 \end{equation}
 $$
 
@@ -72,14 +66,12 @@ where $K= \texttt{k\_rows} \times \texttt{k\_cols}$. Expression $(2)$ is larger 
 Proof:
 $$
 \begin{split}
-
 \texttt{assuming } (1) & > (2) \\
 \\
 I\cdot O\cdot K & > I\cdot O + O \cdot K \\
 I\cdot K & > I + K \\
 I( K - 1) & > K \\
 I & > \frac{K}{K - 1}, K \neq 0 \\
-
 \end{split}
 $$
 
@@ -161,7 +153,6 @@ flowchart-elk TD
     B4E --- B51 --- B52 --- B5E
     B4E --- B5E
     B5E --- C ---> D --- E
-
 ```
 
 </div>
@@ -179,7 +170,6 @@ flowchart-elk TD
     B[BatchNorm2d]:::box
 
     A --- B
-
 ```
 
 Conv2d: Sub-kernels or Channels selection
