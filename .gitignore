@@ -1,0 +1,7 @@
+dog-vs-cat-vs-bird/
+models/
+
+*.zip
+*.csv
+
+submission3.ipynb
