@@ -2,13 +2,9 @@
 
 This is a simple deep learning project focusing on optimizing PyTorch code to perform better with GPU. It is also an exploration with Convolutional Neural Network (CNN) achitecture, specifically [ResNet][5]. 
 
-<!-- - Conv2d with Bias = False and BatchNorm2d after
-- Avoid synchronization
-- Led to further experiment with different type of convolution layer -->
-
 # PyTorch basic GPU optimizations
 
-The code for training a deep CNN model is modified following the "Performance Tuning Guide" [[6]] to fully utilize available GPUs. The training speed was improve significantly [-- just trust me][7].
+The code for training a deep CNN model is modified following the "Performance Tuning Guide" [[6]] to fully utilize available GPUs. The training speed was improve significantly [-- just trust me][7]. 
 
 # Sub-kernels vs Channels Selection Convolution Layer
 
@@ -25,7 +21,8 @@ The learnable weights of a Conv2d module follows the shape:
 
 $$
 \begin{equation} 
-    (\texttt{out\_channels}, \frac{\texttt{in\_channels}}{\texttt{groups}},  \texttt{k\_rows}, \texttt{k\_cols})
+    (C_\texttt{out}, 
+    \frac{C_\texttt{in}}{\texttt{groups}},  K_\texttt{row}, K_\texttt{col})
 \end{equation}
 $$
 
@@ -33,10 +30,10 @@ where, by default, $\texttt{groups}=1$ [[1]]. And base on $(1)$ the total number
 
 $$
 \begin{equation} 
-\texttt{in\_channels} 
-\times \texttt{out\_channels} 
-\times \texttt{k\_rows} 
-\times \texttt{k\_cols}
+C_\texttt{in} 
+\times C_\texttt{out} 
+\times K_\texttt{row} 
+\times K_\texttt{col}
 \end{equation}
 $$
 
@@ -53,15 +50,17 @@ The total learnable parameters for this convolution layer is (without bias):
 
 $$
 \begin{equation}
-\texttt{in\_channels} 
-\times \texttt{out\_channels} 
+C_\texttt{in} 
+\times 
+C_\texttt{out} 
 + 
-\texttt{out\_channels} 
-\times K
+C_\texttt{out}
+\times 
+K
 \end{equation}
 $$
 
-where $K= \texttt{k\_rows} \times \texttt{k\_cols}$. Expression $(2)$ is larger than $(3)$ for any $\texttt{in\_channels} > \frac{K}{K-1}, K\neq0$. For a typical $3\times 3$ kernels layer, the input channels need to be larger than $9/8 \approx 1$.
+where $K= K_\texttt{row} \times K_\texttt{col}$. Expression $(2)$ is larger than $(3)$ for any $C_\texttt{in} > \frac{K}{K-1}, \;\texttt{for}\; K\neq0$. For a typical $3\times 3$ kernels layer, the input channels need to be larger than $9/8 \approx 1$.
 
 Proof:
 $$
@@ -71,7 +70,7 @@ $$
 I\cdot O\cdot K & > I\cdot O + O \cdot K \\
 I\cdot K & > I + K \\
 I( K - 1) & > K \\
-I & > \frac{K}{K - 1}, K \neq 0 \\
+I & > \frac{K}{K - 1}, \; K \neq 0 \\
 \end{split}
 $$
 
