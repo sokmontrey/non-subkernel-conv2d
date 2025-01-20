@@ -76,6 +76,8 @@ $$
 
 # Implementation
 
+## Bad Implementation
+
 ```py
 import torch.nn as nn
 
@@ -102,6 +104,64 @@ class WeightedSumConv2d(nn.Module):
         x = x.permute(0, 3, 1, 2)       # (N, C_out, W, H    )
         return conv2d(x) 
 ```
+
+Although the Conv2d with channels selection required less computations with lower number of learnable parameters, the training time take around twice longer (for small epochs) than with normal Conv2d layer.
+
+| Runs          | Channels selection time (s/10epochs) | Sub kernels (s/10epochs) |
+| ------------- | ------------------------------------ | ------------------------ |
+| 1             | 85.455                               | 48.41                    |
+| 2             | 85.3                                 | 49.54                    |
+| 3             | 84.816                               | 47.89                    |
+| 4             | 84.854                               | 47.66                    |
+| 5             | 85                                   | 47.15                    |
+| Avg (s/epoch) | 8.5085                               | 4.81286                  |
+
+This might be due to the unoptimized and, in a way, unconventional operations required (tensor weighted sum, etc). 
+
+## Good Implementation
+
+The previous implementation is quite inefficient. An improved version uses `nn.Conv2d` with `kernel_size=1` for the weighted sum layer.
+
+```py
+class WeightedSumConv2d(nn.Module):
+    def __init__(
+            self, 
+            in_channels, 
+            out_channels, 
+            stride=1, 
+            kernel_size=3, 
+            padding=0
+        ):
+        super(WeightedSumConv2d, self).__init__()
+        self.weighted_sum = nn.Conv2d(
+            in_channels, 
+            out_channels, 
+            kernel_size=1, 
+            bias=False
+        )
+        self.batch_conv = BatchedConv2d(
+            in_channels=out_channels,
+            out_channels=out_channels,
+            stride=stride,
+            kernel_size=kernel_size,
+            padding=padding,
+            groups=out_channels
+        )
+
+    def forward(self, x):
+        x = self.weighted_sum(x)
+        x = self.batch_conv(x)
+        return x
+```
+
+| Runs          | Improved channels selection time (s/10epochs) |
+| ------------- | --------------------------------------------- |
+| 1             | 47.429                                        |
+| 2             | 48.931                                        |
+| 3             | 49.191                                        |
+| 4             | 47.239                                        |
+| 5             | 47.797                                        |
+| Avg (s/epoch) | 4.81174                                       |
 
 # Test Run
 
@@ -178,12 +238,12 @@ Conv2d: Sub-kernels or Channels selection
 This ResNet inspired model is implemented twice for each type of convolution layer, by replacing the Conv2d. Jupyter notebooks for both implementations can be found in [`notebooks/`](/notebooks/).
 
 | Models                                | Channels selection + Kernels | Sub Kernels           |
-| ------------------------------------- | --------------------------- | --------------------- |
-| Parameters (custom)                   | 27,363                      | 174,787               |
-| Overfitting Epoch                     | ~80 (~50 val loss)          | ~80 (~0.42 val loss)  |
-| Min Test Loss                         | 0.47613 (train: 0.43)       | 0.40116 (train: 0.32) |
-| Submission Score                      | 81.53%                      | 84.17%                |
-| ResNet18 Parameters (performance TBD) | ~1,958,824                  | 11,689,512 [[2]]      |
+| ------------------------------------- | ---------------------------- | --------------------- |
+| Parameters (custom)                   | 27,363                       | 174,787               |
+| Overfitting Epoch                     | ~80 (~50 val loss)           | ~80 (~0.42 val loss)  |
+| Min Test Loss                         | 0.47613 (train: 0.43)        | 0.40116 (train: 0.32) |
+| Submission Score                      | 81.53%                       | 84.17%                |
+| ResNet18 Parameters (performance TBD) | ~1,958,824                   | 11,689,512 [[2]]      |
 
 > [!NOTE]
 > Learnable parameters for ResNet18 with channels selection is calculated by replacing all Conv2d module with the WeightedSumConv2d module.
@@ -207,32 +267,16 @@ channels selection convolution based (blue: train losses, orange: validation los
 
 # Conclusion
 
-## Training speed (pytorch)
-
-Although the Conv2d with channels selection required less computations with lower numebr of learnable parameters, the training time take around twice longer (for small epochs) than with normal Conv2d layer.
-
-| Runs          | Channels selection time (s/10epochs) | Sub kernels (s/10epochs) |
-| ------------- | ------------------------------------ | ------------------------ |
-| 1             | 85.455                               | 48.41                    |
-| 2             | 85.3                                 | 49.54                    |
-| 3             | 84.816                               | 47.89                    |
-| 4             | 84.854                               | 47.66                    |
-| 5             | 85                                   | 47.15                    |
-| Avg (s/epoch) | 8.5085                               | 4.81286                  |
-
-This might be due to the unoptimized and, in a way, unconventional operations required (tensor weighted sum, etc). 
-
-> [!NOTE]
-> Using `torch.compile` might help improve the the training speed but Kaggle's GPU was older than the required version for `torch.compile`. Thus it is worth running the model on a different machine.
-
-## The ability to learn
-
 It's natural to think that channels selection should performs worse than ordinary sub-kernels-based conv2d, which it did during the dog-cat-bird test. But a bigger problem occur during the experiments. The model with channels selection conv2d seem to be incapable of overfitting and unable to surpass a certain loss value, . This might depend on the high-level achitecture of the model and many other imperfection. 
 
 Base on the performance from the dog-cat-bird dataset [[3]], it is safe to say that the channel selection conv2d model perform worst than the ordinary sub-kernels convolution based model. The idea of channels selection convolution need to be tested with different benchmark/dataset.
 
 It is also worth noting that throughout the experiment, different model shapes and hyperparameter were tested. But most, if not all, of the run has shown that the channels selection convolution is incapable to surpass a certain validation loss. Even in the case of intentionally overfitting the dataset. Further understanding of CNN required to tune a model with this convolution layers.
 
+Channel selection has the speed roughly the same as the sub-kernels convolution, slightly faster in some cases. But its inability to overfit a dataset is a big trait of.
+
+> [!NOTE]
+> Using `torch.compile` might help improve the the training speed even further but Kaggle's GPU was older than the required version for `torch.compile`. Thus it is worth running the model on a different machine.
 
 [1]: https://pytorch.org/docs/stable/generated/torch.nn.Conv2d.html#conv2d
 [2]: https://pytorch.org/vision/main/models/generated/torchvision.models.resnet18.html
