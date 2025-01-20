@@ -84,7 +84,7 @@ $$
 C_\texttt{in}\cdot C_\texttt{out}\cdot K & > C_\texttt{in}\cdot C_\texttt{out} + C_\texttt{out} \cdot K \\
 C_\texttt{in}\cdot K & > C_\texttt{in} + K \\
 C_\texttt{in}( K - 1) & > K \\
-C_\texttt{in} & > \frac{K}{K - 1}, \; K \neq 0 \\
+C_\texttt{in} & > \frac{K}{K - 1}, K \neq 0 \\
 \end{split}
 $$
 
@@ -130,7 +130,7 @@ Although the Conv2d with channels selection required less computations with lowe
 | 5             | 85                                   | 47.15                    |
 | **Avg (s/epoch)** | 8.5085                               | 4.81286                  |
 
-This might be due to the unoptimized and, in a way, unconventional operations required (tensor weighted sum, etc). 
+This might be due to the unoptimized and, in a way, unconventional operations performed (tensor weighted sum, etc). 
 
 ## Good Implementation
 
