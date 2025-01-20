@@ -260,7 +260,8 @@ This ResNet inspired model is implemented twice for each type of convolution lay
 | ResNet18 Parameters (performance TBD) | ~1,958,824                   | [11,689,512][2]      |
 
 > [!NOTE]
-> Learnable parameters for ResNet18 with channels selection is calculated by replacing all Conv2d module with the WeightedSumConv2d module.
+> - Overfitting Epoch: Epoch where train loss and validation loss start to diverge
+> - Learnable parameters for ResNet18 with channels selection is calculated by replacing all Conv2d module with the WeightedSumConv2d module.
 
 <div style='display: flex;'>
 <div align='center'>
@@ -281,7 +282,7 @@ channels selection convolution based (blue: train losses, orange: validation los
 
 # Conclusion
 
-It's natural to think that channels selection should performs worse than ordinary sub-kernels-based conv2d, which it did during the dog-cat-bird test. But a bigger problem occur during the experiments. The model with channels selection conv2d seem to be incapable of overfitting and unable to surpass a certain loss value, . This might depend on the high-level achitecture of the model and many other imperfection. 
+It's natural to think that channels selection should performs worse than ordinary sub-kernels-based conv2d, which it did during the dog-cat-bird test. But there's a bigger problem. The model with channels selection conv2d seem to be incapable of overfitting and unable to surpass a certain loss value. This might depend on the high-level achitecture of the model and many other factors. 
 
 Base on the performance from the [dog-cat-bird dataset][3], it is safe to say that the channel selection conv2d model perform worst than the ordinary sub-kernels convolution based model. The idea of channels selection convolution need to be tested with different benchmark/dataset.
 
