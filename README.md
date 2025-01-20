@@ -74,7 +74,7 @@ K
 \end{equation}
 $$
 
-where $K= K_\texttt{row} \times K_\texttt{col}$. Expression $(2)$ is larger than $(3)$ for any $C_\texttt{in} > \frac{K}{K-1}, \texttt{for} K\neq0$. For a typical $3\times 3$ kernels layer, the input channels need to be larger than $9/8 \approx 1$.
+where $K= K_\texttt{row} \times K_\texttt{col}$. Expression $(2)$ is larger than $(3)$ for any $C_\texttt{in} > \frac{K}{K-1}, \texttt{for} K\neq0$. For a typical $3\times 3$ kernels layer, the input channels need to be larger than $\lceil 9/8 \rceil = 2$.
 
 Proof:
 
