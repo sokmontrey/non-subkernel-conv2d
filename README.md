@@ -287,7 +287,7 @@ Base on the performance from the [dog-cat-bird dataset][3], it is safe to say th
 
 It is also worth noting that throughout the experiment, different model shapes and hyperparameter were tested. But most, if not all, of the run has shown that the channels selection convolution is incapable to surpass a certain validation loss. Even in the case of intentionally overfitting the dataset. Further understanding of CNN required to tune a model with this convolution layers.
 
-Channel selection has the speed roughly the same as the sub-kernels convolution, slightly faster in some cases. But its inability to overfit a dataset is a big trait of.
+Channel selection has the speed roughly the same as the sub-kernels convolution, slightly faster in some cases. But its inability to learn a dataset well is a big trait of.
 
 [1]: https://pytorch.org/docs/stable/generated/torch.nn.Conv2d.html#conv2d
 [2]: https://pytorch.org/vision/main/models/generated/torchvision.models.resnet18.html
