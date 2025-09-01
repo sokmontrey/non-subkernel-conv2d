@@ -1,6 +1,5 @@
 # Introduction 
-
-This is a simple deep learning project focusing on optimizing PyTorch code to perform better with GPU. It is also an exploration with Convolutional Neural Network (CNN) achitecture, specifically [ResNet][5]. 
+This is an exploration with Convolutional Neural Network (CNN) achitecture, specifically [ResNet][5]. It is also a simple deep learning project focusing on optimizing PyTorch code for better performance on GPU. 
 
 # Basic optimizations
 
